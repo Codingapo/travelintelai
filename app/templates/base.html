@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}TravelIntel AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+</head>
+<body>
+
+  <!-- ── Sidebar ──────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">✈️</div>
+      <div class="brand-text">
+        <span class="brand-name">TravelIntel AI</span>
+        <span class="brand-tagline">Intelligence Platform</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Main</span>
+
+      <a href="/dashboard" class="nav-item {% if request.url.path == '/dashboard' %}active{% endif %}">
+        <span class="nav-icon">🏠</span>
+        Dashboard
+      </a>
+
+      <a href="/bookings/" class="nav-item {% if '/bookings' in request.url.path and '/create' not in request.url.path %}active{% endif %}">
+        <span class="nav-icon">🎫</span>
+        Bookings
+      </a>
+
+      <a href="/bookings/create" class="nav-item nav-item-action {% if '/bookings/create' in request.url.path %}active{% endif %}">
+        <span class="nav-icon">➕</span>
+        New Booking
+      </a>
+
+      <a href="/analytics/" class="nav-item {% if '/analytics' in request.url.path %}active{% endif %}">
+        <span class="nav-icon">📊</span>
+        Analytics
+      </a>
+
+      <span class="nav-section-label">Operations</span>
+
+      <a href="/events/" class="nav-item {% if '/events' in request.url.path %}active{% endif %}">
+        <span class="nav-icon">⚡</span>
+        Events &amp; Jobs
+      </a>
+
+      <a href="/agencies/" class="nav-item {% if '/agencies' in request.url.path %}active{% endif %}">
+        <span class="nav-icon">🏢</span>
+        Agencies
+      </a>
+
+      <span class="nav-section-label">Developer</span>
+
+      <a href="/api-docs" class="nav-item {% if '/api-docs' in request.url.path %}active{% endif %}">
+        <span class="nav-icon">📖</span>
+        API Documentation
+      </a>
+
+      <a href="/api/docs" class="nav-item" target="_blank">
+        <span class="nav-icon">🔧</span>
+        Swagger UI
+      </a>
+
+      <span class="nav-section-label">System</span>
+
+      <a href="/health" class="nav-item" target="_blank">
+        <span class="nav-icon">💚</span>
+        Health Check
+      </a>
+    </nav>
+
+    <!-- Logout at bottom of sidebar -->
+    <div class="sidebar-footer">
+      <div class="sidebar-status">
+        <div class="status-dot"></div>
+        System Online
+      </div>
+      {% if request.session.get('agency_id') %}
+      <a href="/logout" class="sidebar-logout">
+        <span>🚪</span>
+        <span>Sign Out</span>
+      </a>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- ── Main Wrapper ──────────────────────────────────────── -->
+  <div class="main-wrapper">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="page-title">{% block page_title %}Dashboard{% endblock %}</span>
+        <span class="page-breadcrumb">{% block page_breadcrumb %}{% endblock %}</span>
+      </div>
+      <div class="topbar-right">
+        {% if request.session.get('agency_name') %}
+        <div class="topbar-agency-name">{{ request.session.get('agency_name') }}</div>
+        {% endif %}
+        <div class="topbar-btn" title="Notifications">🔔</div>
+        <div class="topbar-avatar" title="{{ request.session.get('agency_name', 'Agency') }}">
+          {{ (request.session.get('agency_name', 'A') or 'A')[0] | upper }}
+        </div>
+        {% if request.session.get('agency_id') %}
+        <a href="/logout" class="topbar-logout" title="Sign Out">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+  <script>
+    // Highlight active nav on page load
+    document.querySelectorAll('.nav-item').forEach(item => {
+      if (item.getAttribute('href') === window.location.pathname) {
+        item.classList.add('active');
+      }
+    });
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ agency.name }} — Agency Dashboard{% endblock %}
+{% block page_title %}Agency Dashboard{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; {{ agency.name }}{% endblock %}
+
+{% block content %}
+
+{% if success %}
+<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:12px;padding:14px 20px;margin-bottom:20px;color:#34d399;display:flex;align-items:center;gap:10px;">
+  <span>✅</span> {{ success }}
+</div>
+{% endif %}
+{% if error %}
+<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 20px;margin-bottom:20px;color:#f87171;display:flex;align-items:center;gap:10px;">
+  <span>⚠️</span> {{ error }}
+</div>
+{% endif %}
+
+<!-- Welcome hero -->
+<div class="hero-banner fade-in" style="margin-bottom:28px;">
+  <div class="hero-content" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <div class="hero-label">🏢 &nbsp; Agency Portal</div>
+      <h1 class="hero-title" style="font-size:1.6rem;margin-bottom:6px;">
+        Welcome back, <span>{{ agency.name }}</span>
+      </h1>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">{{ agency.email }}</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="/analytics/" class="btn btn-secondary">📊 Analytics</a>
+      <a href="/bookings/" class="btn btn-primary">🎫 All Bookings</a>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid fade-in">
+  <div class="stat-card blue">
+    <div class="stat-icon">🎫</div>
+    <div class="stat-value">{{ total_bookings }}</div>
+    <div class="stat-label">Your Bookings</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">💰</div>
+    <div class="stat-value">R {{ "{:,.0f}".format(total_revenue) }}</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+  <div class="stat-card cyan">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ confirmed_count }}</div>
+    <div class="stat-label">Confirmed</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">🌍</div>
+    <div class="stat-value">{{ destinations | length }}</div>
+    <div class="stat-label">Destinations</div>
+  </div>
+</div>
+
+<div class="grid-2 fade-in" style="margin-top:24px;">
+
+  <!-- Recent bookings -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🎫</span> Recent Bookings</div>
+      <a href="/bookings/" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if bookings %}
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>Customer</th><th>Destination</th><th>Amount</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for b in bookings %}
+            <tr>
+              <td>
+                <div style="font-weight:600;">{{ b.customer_name }}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);">{{ b.customer_email }}</div>
+              </td>
+              <td style="text-transform:capitalize;">{{ b.destination }}</td>
+              <td style="color:var(--accent-green);font-weight:600;">R {{ "{:,.0f}".format(b.amount) }}</td>
+              <td>
+                {% if b.booking_status == 'confirmed' %}
+                  <span class="badge badge-green">✓ confirmed</span>
+                {% else %}
+                  <span class="badge badge-gray">{{ b.booking_status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🎫</div>
+        <p>No bookings yet. Send booking events via the API.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Agency info + API key -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🔑</span> Your API Key</div>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px;">
+          Use this key in the <code>x-api-key</code> header when sending events to TravelIntel.
+        </p>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:10px;padding:12px 16px;font-family:'Courier New',monospace;font-size:0.8rem;color:var(--accent-cyan);word-break:break-all;letter-spacing:0.5px;">
+          {{ agency.api_key }}
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;">
+          <a href="/api/docs" target="_blank" class="btn btn-secondary btn-sm">📖 API Docs</a>
+          <a href="/analytics/" class="btn btn-primary btn-sm">📊 View Analytics</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">⚡</span> Recent Events</div>
+        <a href="/events/" class="btn btn-secondary btn-sm">View All</a>
+      </div>
+      <div class="card-body">
+        {% if recent_events %}
+        <div class="timeline">
+          {% for ev in recent_events %}
+          <div class="timeline-item">
+            <div class="timeline-dot {% if ev.status == 'processed' %}green{% else %}blue{% endif %}">⚡</div>
+            <div class="timeline-content">
+              <div class="timeline-title">{{ ev.event_type }}</div>
+              <div class="timeline-meta">
+                <span class="badge {% if ev.status == 'processed' %}badge-green{% else %}badge-blue{% endif %}">{{ ev.status }}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:24px;">
+          <div class="empty-icon">⚡</div>
+          <p>No events yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

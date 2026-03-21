@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Bookings — TravelIntel AI{% endblock %}
+{% block page_title %}Bookings{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; All Bookings{% endblock %}
+
+{% block content %}
+
+{% if request.query_params.get('deleted') %}
+<div class="alert alert-success fade-in" style="margin-bottom:16px;">
+  <span>✅</span> Booking deleted successfully.
+</div>
+{% endif %}
+
+<div class="page-header fade-in" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1>🎫 Bookings</h1>
+    <p>All travel bookings across your agencies — {{ total }} total records.</p>
+  </div>
+  <a href="/bookings/create" class="btn btn-primary">
+    <span>➕</span> New Booking
+  </a>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid mb-6 fade-in">
+  <div class="stat-card blue">
+    <div class="stat-icon">🎫</div>
+    <div class="stat-value">{{ total }}</div>
+    <div class="stat-label">Total Bookings</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ bookings | selectattr('booking_status', 'equalto', 'confirmed') | list | length }}</div>
+    <div class="stat-label">Confirmed</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-icon">💰</div>
+    <div class="stat-value">R {{ "{:,.0f}".format(bookings | sum(attribute='amount')) }}</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">🌍</div>
+    <div class="stat-value">{{ bookings | map(attribute='destination') | unique | list | length }}</div>
+    <div class="stat-label">Destinations</div>
+  </div>
+</div>
+
+<!-- Bookings Table -->
+<div class="card fade-in">
+  <div class="card-header">
+    <div class="card-title"><span class="icon">📋</span> Booking Records</div>
+    <div class="card-actions">
+      <span class="badge badge-blue">{{ total }} records</span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if bookings %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Booking ID</th>
+            <th>Customer</th>
+            <th>Destination</th>
+            <th>Departure</th>
+            <th>Return</th>
+            <th>Amount</th>
+            <th>Channel</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+          <tr>
+            <td style="color:var(--text-muted);font-size:0.78rem;">{{ b.id }}</td>
+            <td class="font-mono" style="font-size:0.78rem;color:var(--accent-cyan);">{{ b.booking_id }}</td>
+            <td>
+              <div style="font-weight:600;color:var(--text-primary);">{{ b.customer_name }}</div>
+              <div style="font-size:0.72rem;color:var(--text-muted);">{{ b.customer_email }}</div>
+            </td>
+            <td>
+              <span style="text-transform:capitalize;">{{ b.destination }}</span>
+            </td>
+            <td style="font-size:0.82rem;">{{ b.departure_date }}</td>
+            <td style="font-size:0.82rem;">{{ b.return_date }}</td>
+            <td style="color:var(--accent-green);font-weight:600;">
+              {{ b.currency }} {{ "{:,.0f}".format(b.amount) }}
+            </td>
+            <td>
+              {% if b.channel %}
+                <span class="badge badge-gray">{{ b.channel }}</span>
+              {% else %}
+                <span style="color:var(--text-muted);">—</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if b.booking_status == 'confirmed' %}
+                <span class="badge badge-green">✓ confirmed</span>
+              {% elif b.booking_status == 'pending' %}
+                <span class="badge badge-orange">⏳ pending</span>
+              {% elif b.booking_status == 'cancelled' %}
+                <span class="badge badge-red">✗ cancelled</span>
+              {% else %}
+                <span class="badge badge-gray">{{ b.booking_status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="/bookings/{{ b.id }}" class="btn btn-secondary btn-sm">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🎫</div>
+      <p>No bookings found. Start by sending booking events via the API.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

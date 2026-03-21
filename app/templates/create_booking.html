@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}Create Booking — TravelIntel AI{% endblock %}
+{% block page_title %}New Booking{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; <a href="/bookings/" style="color:var(--accent-blue);text-decoration:none;">Bookings</a> &nbsp;/&nbsp; Create{% endblock %}
+
+{% block content %}
+
+{% if error %}
+<div class="alert alert-error fade-in">
+  <span>⚠️</span> {{ error }}
+</div>
+{% endif %}
+
+<div class="booking-form-layout fade-in">
+
+  <!-- Left: Form -->
+  <div class="booking-form-main">
+
+    <form method="POST" action="/bookings/create" class="booking-form">
+
+      <!-- Section: Customer Information -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="form-section-icon">👤</span>
+          <div>
+            <h3 class="form-section-title">Customer Information</h3>
+            <p class="form-section-desc">Details of the traveller making the booking</p>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name <span class="required">*</span></label>
+            <input type="text" name="customer_name" class="form-input" placeholder="e.g. Jane Doe" required value="{{ form.customer_name if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="required">*</span></label>
+            <input type="email" name="customer_email" class="form-input" placeholder="jane@example.com" required value="{{ form.customer_email if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer ID <span class="required">*</span></label>
+            <input type="text" name="customer_id" class="form-input" placeholder="e.g. CUST-001" required value="{{ form.customer_id if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input type="number" name="customer_age" class="form-input" placeholder="e.g. 32" min="1" max="120" value="{{ form.customer_age if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Type</label>
+            <select name="customer_email_type" class="form-select">
+              <option value="">— Select —</option>
+              <option value="personal" {% if form and form.customer_email_type == 'personal' %}selected{% endif %}>Personal</option>
+              <option value="business" {% if form and form.customer_email_type == 'business' %}selected{% endif %}>Business</option>
+              <option value="other" {% if form and form.customer_email_type == 'other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Agency ID <span class="required">*</span></label>
+            <input type="text" name="agency_id" class="form-input" placeholder="e.g. AGY-001" required value="{{ form.agency_id if form else (request.session.get('agency_id', '') | string) }}" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Trip Details -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="form-section-icon">✈️</span>
+          <div>
+            <h3 class="form-section-title">Trip Details</h3>
+            <p class="form-section-desc">Destination and travel dates</p>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Destination <span class="required">*</span></label>
+            <input type="text" name="destination" class="form-input" placeholder="e.g. Cape Town, South Africa" required value="{{ form.destination if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Departure Date <span class="required">*</span></label>
+            <input type="date" name="departure_date" class="form-input" required value="{{ form.departure_date if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Return Date <span class="required">*</span></label>
+            <input type="date" name="return_date" class="form-input" required value="{{ form.return_date if form else '' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Booking Channel</label>
+            <select name="channel" class="form-select">
+              <option value="">— Select —</option>
+              <option value="online" {% if form and form.channel == 'online' %}selected{% endif %}>Online</option>
+              <option value="phone" {% if form and form.channel == 'phone' %}selected{% endif %}>Phone</option>
+              <option value="walk-in" {% if form and form.channel == 'walk-in' %}selected{% endif %}>Walk-in</option>
+              <option value="agent" {% if form and form.channel == 'agent' %}selected{% endif %}>Agent</option>
+              <option value="api" {% if form and form.channel == 'api' %}selected{% endif %}>API</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <select name="source" class="form-select">
+              <option value="">— Select —</option>
+              <option value="website" {% if form and form.source == 'website' %}selected{% endif %}>Website</option>
+              <option value="referral" {% if form and form.source == 'referral' %}selected{% endif %}>Referral</option>
+              <option value="social" {% if form and form.source == 'social' %}selected{% endif %}>Social Media</option>
+              <option value="email" {% if form and form.source == 'email' %}selected{% endif %}>Email Campaign</option>
+              <option value="direct" {% if form and form.source == 'direct' %}selected{% endif %}>Direct</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Payment -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="form-section-icon">💳</span>
+          <div>
+            <h3 class="form-section-title">Payment Details</h3>
+            <p class="form-section-desc">Booking amount and currency</p>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Currency <span class="required">*</span></label>
+            <select name="currency" class="form-select" required>
+              <option value="ZAR" {% if not form or form.currency == 'ZAR' %}selected{% endif %}>ZAR — South African Rand</option>
+              <option value="USD" {% if form and form.currency == 'USD' %}selected{% endif %}>USD — US Dollar</option>
+              <option value="EUR" {% if form and form.currency == 'EUR' %}selected{% endif %}>EUR — Euro</option>
+              <option value="GBP" {% if form and form.currency == 'GBP' %}selected{% endif %}>GBP — British Pound</option>
+              <option value="KES" {% if form and form.currency == 'KES' %}selected{% endif %}>KES — Kenyan Shilling</option>
+              <option value="NGN" {% if form and form.currency == 'NGN' %}selected{% endif %}>NGN — Nigerian Naira</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount <span class="required">*</span></label>
+            <input type="number" name="amount" class="form-input" placeholder="e.g. 8500" step="0.01" min="0" required value="{{ form.amount if form else '' }}" />
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Booking Status <span class="required">*</span></label>
+            <div class="status-radio-group">
+              <label class="status-radio {% if not form or form.booking_status == 'confirmed' %}checked{% endif %}">
+                <input type="radio" name="booking_status" value="confirmed" {% if not form or form.booking_status == 'confirmed' %}checked{% endif %} />
+                <span class="status-radio-dot green"></span>
+                <span>Confirmed</span>
+              </label>
+              <label class="status-radio {% if form and form.booking_status == 'pending' %}checked{% endif %}">
+                <input type="radio" name="booking_status" value="pending" {% if form and form.booking_status == 'pending' %}checked{% endif %} />
+                <span class="status-radio-dot orange"></span>
+                <span>Pending</span>
+              </label>
+              <label class="status-radio {% if form and form.booking_status == 'cancelled' %}checked{% endif %}">
+                <input type="radio" name="booking_status" value="cancelled" {% if form and form.booking_status == 'cancelled' %}checked{% endif %} />
+                <span class="status-radio-dot red"></span>
+                <span>Cancelled</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a href="/bookings/" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg">
+          <span>✈️</span> Create Booking
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Right: Info panel -->
+  <div class="booking-form-side">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">💡</span> Quick Guide</div>
+      </div>
+      <div class="card-body">
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="guide-step-num">1</div>
+            <div>
+              <strong>Customer Info</strong>
+              <p>Enter the traveller's full name, email and ID. Age and email type are optional but help with AI segmentation.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">2</div>
+            <div>
+              <strong>Trip Details</strong>
+              <p>Set the destination and travel dates. Channel and source help track where bookings come from.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">3</div>
+            <div>
+              <strong>Payment</strong>
+              <p>Enter the booking amount and select the correct currency. Status can be updated later.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">4</div>
+            <div>
+              <strong>AI Processing</strong>
+              <p>Once created, the booking is automatically evaluated for anomalies and added to the demand forecast.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📊</span> Recent Bookings</div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        {% if recent_bookings %}
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Customer</th><th>Destination</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for b in recent_bookings %}
+              <tr>
+                <td style="font-size:0.8rem;">{{ b.customer_name }}</td>
+                <td style="font-size:0.8rem;text-transform:capitalize;">{{ b.destination }}</td>
+                <td>
+                  {% if b.booking_status == 'confirmed' %}
+                    <span class="badge badge-green">✓</span>
+                  {% elif b.booking_status == 'pending' %}
+                    <span class="badge badge-orange">⏳</span>
+                  {% else %}
+                    <span class="badge badge-red">✗</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:20px;">
+          <div class="empty-icon">🎫</div>
+          <p>No bookings yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Auto-generate booking ID
+  document.addEventListener('DOMContentLoaded', function() {
+    // Status radio styling
+    document.querySelectorAll('.status-radio input').forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.querySelectorAll('.status-radio').forEach(l => l.classList.remove('checked'));
+        this.closest('.status-radio').classList.add('checked');
+      });
+    });
+  });
+</script>
+{% endblock %}

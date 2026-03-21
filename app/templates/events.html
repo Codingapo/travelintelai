@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Events & Jobs — TravelIntel AI{% endblock %}
+{% block page_title %}Events & Jobs{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; Operations{% endblock %}
+
+{% block content %}
+
+<div class="page-header fade-in">
+  <h1>⚡ Events &amp; Processing Jobs</h1>
+  <p>Webhook events, background jobs, and email delivery logs.</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid mb-6 fade-in">
+  <div class="stat-card blue">
+    <div class="stat-icon">⚡</div>
+    <div class="stat-value">{{ total_events }}</div>
+    <div class="stat-label">Total Events</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ completed_jobs }}</div>
+    <div class="stat-label">Completed Jobs</div>
+  </div>
+  <div class="stat-card red" style="--accent-red:#ef4444;">
+    <div class="stat-icon">❌</div>
+    <div class="stat-value">{{ failed_jobs }}</div>
+    <div class="stat-label">Failed Jobs</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">📧</div>
+    <div class="stat-value">{{ emails | length }}</div>
+    <div class="stat-label">Email Logs</div>
+  </div>
+</div>
+
+<!-- Event Logs -->
+<div class="card mb-6 fade-in">
+  <div class="card-header">
+    <div class="card-title"><span class="icon">⚡</span> Event Logs</div>
+    <span class="badge badge-blue">{{ total_events }} events</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if events %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Type</th>
+            <th>Agency</th>
+            <th>Booking ID</th>
+            <th>Status</th>
+            <th>Received At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in events %}
+          <tr>
+            <td class="font-mono" style="font-size:0.72rem;color:var(--accent-cyan);">{{ ev.event_id }}</td>
+            <td>
+              <span class="badge badge-blue">{{ ev.event_type }}</span>
+            </td>
+            <td>{{ ev.agency_name }}</td>
+            <td class="font-mono" style="font-size:0.78rem;">{{ ev.booking_id or '—' }}</td>
+            <td>
+              {% if ev.status == 'processed' %}
+                <span class="badge badge-green">✓ processed</span>
+              {% elif ev.status == 'failed' %}
+                <span class="badge badge-red">✗ failed</span>
+              {% else %}
+                <span class="badge badge-orange">⏳ {{ ev.status }}</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.78rem;color:var(--text-muted);">{{ ev.received_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">⚡</div>
+      <p>No events received yet. Send booking events via the API.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Processing Jobs -->
+<div class="card mb-6 fade-in">
+  <div class="card-header">
+    <div class="card-title"><span class="icon">⚙️</span> Processing Jobs</div>
+    <span class="badge badge-purple">{{ total_jobs }} jobs</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if jobs %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Event ID</th>
+            <th>Job Type</th>
+            <th>Status</th>
+            <th>Attempts</th>
+            <th>Last Error</th>
+            <th>Created</th>
+            <th>Processed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for j in jobs %}
+          <tr>
+            <td class="font-mono" style="font-size:0.72rem;color:var(--accent-cyan);">{{ j.event_id }}</td>
+            <td><span class="badge badge-blue">{{ j.job_type }}</span></td>
+            <td>
+              {% if j.status == 'completed' %}
+                <span class="badge badge-green">✓ completed</span>
+              {% elif j.status == 'failed' %}
+                <span class="badge badge-red">✗ failed</span>
+              {% else %}
+                <span class="badge badge-orange">⏳ {{ j.status }}</span>
+              {% endif %}
+            </td>
+            <td style="text-align:center;">{{ j.attempt_count }}</td>
+            <td style="font-size:0.78rem;color:var(--accent-red);">{{ j.last_error or '—' }}</td>
+            <td style="font-size:0.78rem;color:var(--text-muted);">{{ j.created_at }}</td>
+            <td style="font-size:0.78rem;color:var(--text-muted);">{{ j.processed_at or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">⚙️</div>
+      <p>No processing jobs found.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Email Logs -->
+<div class="card fade-in">
+  <div class="card-header">
+    <div class="card-title"><span class="icon">📧</span> Email Delivery Logs</div>
+    <span class="badge badge-cyan">{{ emails | length }} emails</span>
+  </div>
+  <div class="card-body" style="padding:0;">
+    {% if emails %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Booking ID</th>
+            <th>Agency</th>
+            <th>Recipient</th>
+            <th>Type</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Error</th>
+            <th>Sent At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in emails %}
+          <tr>
+            <td class="font-mono" style="font-size:0.78rem;color:var(--accent-cyan);">{{ e.booking_id or '—' }}</td>
+            <td>{{ e.agency_name }}</td>
+            <td style="font-size:0.82rem;">{{ e.recipient_email }}</td>
+            <td>
+              {% if e.recipient_type == 'customer' %}
+                <span class="badge badge-purple">👤 customer</span>
+              {% else %}
+                <span class="badge badge-blue">{{ e.recipient_type }}</span>
+              {% endif %}
+            </td>
+            <td class="truncate" style="max-width:180px;font-size:0.82rem;">{{ e.subject }}</td>
+            <td>
+              {% if e.status == 'sent' %}
+                <span class="badge badge-green">✓ sent</span>
+              {% elif e.status == 'skipped' %}
+                <span class="badge badge-orange">⏭ skipped</span>
+              {% elif e.status == 'failed' %}
+                <span class="badge badge-red">✗ failed</span>
+              {% else %}
+                <span class="badge badge-gray">{{ e.status }}</span>
+              {% endif %}
+            </td>
+            <td style="font-size:0.75rem;color:var(--accent-orange);">{{ e.error_message or '—' }}</td>
+            <td style="font-size:0.75rem;color:var(--text-muted);">{{ e.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📧</div>
+      <p>No email logs found.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

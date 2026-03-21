@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Booking {{ booking.booking_id }} — TravelIntel AI{% endblock %}
+{% block page_title %}Booking Detail{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; <a href="/bookings/" style="color:var(--accent-blue);text-decoration:none;">Bookings</a> &nbsp;/&nbsp; {{ booking.booking_id }}{% endblock %}
+
+{% block content %}
+
+{% if just_created %}
+<div class="alert alert-success fade-in">
+  <span>✅</span> Booking <strong>{{ booking.booking_id }}</strong> created successfully and is now being processed by the AI engine.
+</div>
+{% endif %}
+{% if request.query_params.get('updated') %}
+<div class="alert alert-success fade-in">
+  <span>✅</span> Booking status updated successfully.
+</div>
+{% endif %}
+
+<!-- Header row -->
+<div class="page-header fade-in" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+  <div>
+    <h1 style="margin-bottom:4px;">🎫 {{ booking.booking_id }}</h1>
+    <p style="color:var(--text-muted);font-size:0.88rem;">Created {{ booking.created_at.strftime('%d %b %Y at %H:%M') if booking.created_at else '' }}</p>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+    {% if booking.booking_status == 'confirmed' %}
+      <span class="badge badge-green" style="font-size:0.85rem;padding:6px 14px;">✓ Confirmed</span>
+    {% elif booking.booking_status == 'pending' %}
+      <span class="badge badge-orange" style="font-size:0.85rem;padding:6px 14px;">⏳ Pending</span>
+    {% elif booking.booking_status == 'cancelled' %}
+      <span class="badge badge-red" style="font-size:0.85rem;padding:6px 14px;">✗ Cancelled</span>
+    {% else %}
+      <span class="badge badge-gray" style="font-size:0.85rem;padding:6px 14px;">{{ booking.booking_status }}</span>
+    {% endif %}
+    <a href="/bookings/create" class="btn btn-primary btn-sm">➕ New Booking</a>
+  </div>
+</div>
+
+<div class="grid-2 fade-in">
+
+  <!-- Booking Info -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📋</span> Booking Information</div>
+    </div>
+    <div class="card-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Booking ID</div>
+          <div class="detail-value font-mono" style="color:var(--accent-cyan);">{{ booking.booking_id }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Agency</div>
+          <div class="detail-value">{{ booking.agency_id }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Destination</div>
+          <div class="detail-value" style="text-transform:capitalize;">🌍 {{ booking.destination }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Departure Date</div>
+          <div class="detail-value">📅 {{ booking.departure_date }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Return Date</div>
+          <div class="detail-value">📅 {{ booking.return_date }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Amount</div>
+          <div class="detail-value" style="color:var(--accent-green);font-size:1.2rem;font-weight:700;">
+            {{ booking.currency }} {{ "{:,.2f}".format(booking.amount) }}
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Channel</div>
+          <div class="detail-value">{{ booking.channel or '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Source</div>
+          <div class="detail-value">{{ booking.source or '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Created At</div>
+          <div class="detail-value" style="font-size:0.82rem;">{{ booking.created_at }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Info -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">👤</span> Customer Information</div>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+        <div style="width:56px;height:56px;border-radius:var(--radius-lg);background:var(--gradient-purple);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:white;flex-shrink:0;">
+          {{ booking.customer_name[0] | upper }}
+        </div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:700;color:var(--text-primary);">{{ booking.customer_name }}</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);">{{ booking.customer_email }}</div>
+        </div>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Customer ID</div>
+          <div class="detail-value font-mono" style="font-size:0.82rem;color:var(--accent-cyan);">{{ booking.customer_id }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Age</div>
+          <div class="detail-value">{{ booking.customer_age or '—' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Email Type</div>
+          <div class="detail-value">
+            {% if booking.customer_email_type == 'business' %}
+              <span class="badge badge-blue">🏢 business</span>
+            {% elif booking.customer_email_type == 'personal' %}
+              <span class="badge badge-purple">👤 personal</span>
+            {% else %}
+              <span class="badge badge-gray">{{ booking.customer_email_type or '—' }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Actions row -->
+<div class="grid-2 fade-in" style="margin-top:24px;">
+
+  <!-- Update Status -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🔄</span> Update Booking Status</div>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="/bookings/{{ booking.id }}/status">
+        <div class="status-radio-group" style="margin-bottom:20px;">
+          <label class="status-radio {% if booking.booking_status == 'confirmed' %}checked{% endif %}">
+            <input type="radio" name="booking_status" value="confirmed" {% if booking.booking_status == 'confirmed' %}checked{% endif %} />
+            <span class="status-radio-dot green"></span>
+            <span>Confirmed</span>
+          </label>
+          <label class="status-radio {% if booking.booking_status == 'pending' %}checked{% endif %}">
+            <input type="radio" name="booking_status" value="pending" {% if booking.booking_status == 'pending' %}checked{% endif %} />
+            <span class="status-radio-dot orange"></span>
+            <span>Pending</span>
+          </label>
+          <label class="status-radio {% if booking.booking_status == 'cancelled' %}checked{% endif %}">
+            <input type="radio" name="booking_status" value="cancelled" {% if booking.booking_status == 'cancelled' %}checked{% endif %} />
+            <span class="status-radio-dot red"></span>
+            <span>Cancelled</span>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Status</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="card" style="border-color:rgba(239,68,68,0.25);">
+    <div class="card-header">
+      <div class="card-title" style="color:#f87171;"><span class="icon">⚠️</span> Danger Zone</div>
+    </div>
+    <div class="card-body">
+      <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:16px;">
+        Permanently delete this booking record. This action cannot be undone.
+      </p>
+      <form method="POST" action="/bookings/{{ booking.id }}/delete" onsubmit="return confirm('Are you sure you want to delete booking {{ booking.booking_id }}? This cannot be undone.');">
+        <button type="submit" class="btn btn-danger">🗑️ Delete Booking</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Back link -->
+<div class="mt-4 fade-in">
+  <a href="/bookings/" class="btn btn-secondary">← Back to Bookings</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.status-radio input').forEach(radio => {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.status-radio').forEach(l => l.classList.remove('checked'));
+      this.closest('.status-radio').classList.add('checked');
+    });
+  });
+</script>
+{% endblock %}

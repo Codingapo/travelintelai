@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Your Agency — TravelIntel AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="stylesheet" href="/static/css/auth.css"/>
+</head>
+<body class="auth-body">
+
+  <div class="auth-split">
+
+    <!-- Left panel -->
+    <div class="auth-panel-left">
+      <div class="auth-panel-content">
+        <a href="/" class="auth-back">← Back to home</a>
+        <div class="auth-brand">
+          <span class="auth-brand-icon">✈️</span>
+          <span class="auth-brand-name">TravelIntel <strong>AI</strong></span>
+        </div>
+        <h1 class="auth-title">Register your agency</h1>
+        <p class="auth-subtitle">Create a free account and start using AI-powered booking intelligence today.</p>
+
+        {% if error %}
+        <div class="auth-alert error">
+          <span>⚠️</span> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="/register" class="auth-form">
+          <div class="auth-field">
+            <label>Agency Name</label>
+            <input type="text" name="name" placeholder="e.g. Sunrise Travel" required autocomplete="organization"/>
+          </div>
+          <div class="auth-field">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="you@youragency.com" required autocomplete="email"/>
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Minimum 6 characters" required autocomplete="new-password"/>
+          </div>
+          <div class="auth-field">
+            <label>Confirm Password</label>
+            <input type="password" name="confirm" placeholder="Repeat your password" required autocomplete="new-password"/>
+          </div>
+          <button type="submit" class="auth-submit">
+            Create Agency Account
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+      </div>
+    </div>
+
+    <!-- Right panel (decorative) -->
+    <div class="auth-panel-right">
+      <div class="auth-deco-orb auth-deco-orb-1"></div>
+      <div class="auth-deco-orb auth-deco-orb-2"></div>
+      <div class="auth-deco-content">
+        <div class="auth-deco-icon">🌍</div>
+        <h2>Join 50+ agencies<br/>already using TravelIntel AI</h2>
+        <p>Real-time booking intelligence, demand forecasting, and automated customer communications — all in one platform.</p>
+        <div class="auth-deco-features">
+          <div class="auth-deco-feat"><span>🧠</span> AI Booking Evaluation</div>
+          <div class="auth-deco-feat"><span>🔮</span> 30-Day Demand Forecast</div>
+          <div class="auth-deco-feat"><span>👥</span> Customer Segmentation</div>
+          <div class="auth-deco-feat"><span>🚨</span> Anomaly Detection</div>
+          <div class="auth-deco-feat"><span>📧</span> Automated Confirmations</div>
+          <div class="auth-deco-feat"><span>🔌</span> Simple REST API</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

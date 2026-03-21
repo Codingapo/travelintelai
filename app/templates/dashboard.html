@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — TravelIntel AI{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; Overview{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner -->
+<div class="hero-banner fade-in">
+  <div class="hero-content">
+    <div class="hero-label">✈️ &nbsp; Live Intelligence Platform</div>
+    <h1 class="hero-title">Welcome to <span>TravelIntel AI</span></h1>
+    <p class="hero-subtitle">
+      Real-time travel booking intelligence — monitor bookings, detect anomalies,
+      forecast demand, and segment customers all in one place.
+    </p>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card blue fade-in fade-in-1">
+    <div class="stat-icon">🎫</div>
+    <div class="stat-value">{{ total_bookings }}</div>
+    <div class="stat-label">Total Bookings</div>
+    <div class="stat-change up">↑ Active</div>
+  </div>
+
+  <div class="stat-card green fade-in fade-in-2">
+    <div class="stat-icon">💰</div>
+    <div class="stat-value">R {{ "{:,.0f}".format(total_revenue) }}</div>
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-change up">↑ ZAR</div>
+  </div>
+
+  <div class="stat-card cyan fade-in fade-in-3">
+    <div class="stat-icon">✅</div>
+    <div class="stat-value">{{ confirmed_bookings }}</div>
+    <div class="stat-label">Confirmed</div>
+    <div class="stat-change up">↑ Confirmed</div>
+  </div>
+
+  <div class="stat-card purple fade-in fade-in-4">
+    <div class="stat-icon">🏢</div>
+    <div class="stat-value">{{ total_agencies }}</div>
+    <div class="stat-label">Agencies</div>
+  </div>
+
+  <div class="stat-card orange fade-in fade-in-5">
+    <div class="stat-icon">🌍</div>
+    <div class="stat-value">{{ total_destinations }}</div>
+    <div class="stat-label">Destinations</div>
+  </div>
+</div>
+
+<!-- Main Grid -->
+<div class="grid-2 mb-6">
+
+  <!-- Recent Bookings -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🎫</span> Recent Bookings</div>
+      <a href="/bookings/" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <div class="card-body" style="padding:0;">
+      {% if recent_bookings %}
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Destination</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in recent_bookings %}
+            <tr>
+              <td>
+                <a href="/bookings/{{ b.id }}" style="color:var(--text-primary);font-weight:600;">{{ b.customer_name }}</a>
+                <div style="font-size:0.72rem;color:var(--text-muted);">{{ b.customer_email }}</div>
+              </td>
+              <td style="text-transform:capitalize;">{{ b.destination }}</td>
+              <td style="color:var(--accent-green);font-weight:600;">R {{ "{:,.0f}".format(b.amount) }}</td>
+              <td>
+                {% if b.booking_status == 'confirmed' %}
+                  <span class="badge badge-green">✓ {{ b.booking_status }}</span>
+                {% elif b.booking_status == 'pending' %}
+                  <span class="badge badge-orange">⏳ {{ b.booking_status }}</span>
+                {% else %}
+                  <span class="badge badge-gray">{{ b.booking_status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🎫</div>
+        <p>No bookings yet</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Event Activity -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">⚡</span> Recent Events</div>
+      <a href="/events/" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <div class="card-body">
+      {% if recent_events %}
+      <div class="timeline">
+        {% for ev in recent_events %}
+        <div class="timeline-item">
+          <div class="timeline-dot {% if ev.status == 'processed' %}green{% elif ev.status == 'failed' %}red{% else %}blue{% endif %}">
+            {% if ev.event_type == 'booking.created' %}🎫
+            {% elif ev.event_type == 'booking.updated' %}✏️
+            {% else %}⚡{% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">{{ ev.event_type }}</div>
+            <div class="timeline-meta">
+              {{ ev.agency_name }} &nbsp;·&nbsp;
+              <span class="badge {% if ev.status == 'processed' %}badge-green{% elif ev.status == 'failed' %}badge-red{% else %}badge-blue{% endif %}">{{ ev.status }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">⚡</div>
+        <p>No events yet</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Row -->
+<div class="grid-3">
+
+  <!-- Processing Jobs -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">⚙️</span> Processing Jobs</div>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="dest-card">
+          <div class="dest-icon" style="background:var(--gradient-green);">✅</div>
+          <div class="dest-info">
+            <div class="dest-name">Completed</div>
+            <div class="dest-amount">Jobs processed successfully</div>
+          </div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent-green);">{{ completed_jobs }}</div>
+        </div>
+        <div class="dest-card">
+          <div class="dest-icon" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">❌</div>
+          <div class="dest-info">
+            <div class="dest-name">Failed</div>
+            <div class="dest-amount">Jobs with errors</div>
+          </div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent-red);">{{ failed_jobs }}</div>
+        </div>
+        <div class="dest-card">
+          <div class="dest-icon" style="background:var(--gradient-blue);">📋</div>
+          <div class="dest-info">
+            <div class="dest-name">Total Events</div>
+            <div class="dest-amount">All event logs</div>
+          </div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent-blue);">{{ total_events }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div class="card fade-in" style="grid-column:span 2;">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🚀</span> Quick Actions</div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
+        <a href="/analytics/" class="dest-card" style="text-decoration:none;">
+          <div class="dest-icon" style="background:var(--gradient-purple);">📊</div>
+          <div class="dest-info">
+            <div class="dest-name">Analytics</div>
+            <div class="dest-amount">Forecasts &amp; Anomalies</div>
+          </div>
+        </a>
+        <a href="/bookings/" class="dest-card" style="text-decoration:none;">
+          <div class="dest-icon" style="background:var(--gradient-blue);">🎫</div>
+          <div class="dest-info">
+            <div class="dest-name">All Bookings</div>
+            <div class="dest-amount">View &amp; manage</div>
+          </div>
+        </a>
+        <a href="/agencies/" class="dest-card" style="text-decoration:none;">
+          <div class="dest-icon" style="background:var(--gradient-orange);">🏢</div>
+          <div class="dest-info">
+            <div class="dest-name">Agencies</div>
+            <div class="dest-amount">Partner overview</div>
+          </div>
+        </a>
+        <a href="/docs" target="_blank" class="dest-card" style="text-decoration:none;">
+          <div class="dest-icon" style="background:var(--gradient-cyan);">📖</div>
+          <div class="dest-info">
+            <div class="dest-name">API Docs</div>
+            <div class="dest-amount">OpenAPI / Swagger</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

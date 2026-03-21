@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Analytics — TravelIntel AI{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; AI Intelligence{% endblock %}
+
+{% block content %}
+
+<div class="page-header fade-in">
+  <h1>📊 Analytics &amp; AI Intelligence</h1>
+  <p>Demand forecasting, anomaly detection, and customer segmentation powered by machine learning.</p>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid mb-6 fade-in">
+  <div class="stat-card blue">
+    <div class="stat-icon">🎫</div>
+    <div class="stat-value">{{ total_bookings }}</div>
+    <div class="stat-label">Bookings Analysed</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">💰</div>
+    <div class="stat-value">R {{ "{:,.0f}".format(total_revenue) }}</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+  <div class="stat-card red" style="--accent-red:#ef4444;">
+    <div class="stat-icon">🚨</div>
+    <div class="stat-value">{{ anomalies | length }}</div>
+    <div class="stat-label">Anomalies Detected</div>
+  </div>
+  <div class="stat-card cyan">
+    <div class="stat-icon">🔮</div>
+    <div class="stat-value">{{ forecast | length }}</div>
+    <div class="stat-label">Days Forecasted</div>
+  </div>
+</div>
+
+<div class="grid-2 mb-6">
+
+  <!-- Revenue by Destination -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🌍</span> Revenue by Destination</div>
+    </div>
+    <div class="card-body">
+      {% if revenue_by_dest %}
+        {% set max_rev = revenue_by_dest.values() | max %}
+        {% for dest, rev in revenue_by_dest.items() %}
+        <div class="dest-card mb-4" style="margin-bottom:10px;">
+          <div class="dest-icon">🌍</div>
+          <div class="dest-info">
+            <div class="dest-name">{{ dest | capitalize }}</div>
+            <div class="dest-bar-wrap">
+              <div class="dest-bar" style="width:{{ (rev / max_rev * 100) | int }}%;"></div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;color:var(--accent-green);font-size:0.9rem;">R {{ "{:,.0f}".format(rev) }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">🌍</div>
+          <p>No destination data available.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Demand Forecast -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🔮</span> 7-Day Revenue Forecast</div>
+      <span class="badge badge-cyan">ML Model</span>
+    </div>
+    <div class="card-body">
+      {% if forecast %}
+        {% set max_pred = forecast | map(attribute='predicted_revenue') | max %}
+        <div class="forecast-list">
+          {% for f in forecast %}
+          <div class="forecast-item">
+            <div class="forecast-date">{{ f.date[5:] }}</div>
+            <div class="forecast-bar-wrap">
+              <div class="forecast-bar" style="width:{% if max_pred > 0 %}{{ (f.predicted_revenue / max_pred * 100) | int }}{% else %}0{% endif %}%;"></div>
+            </div>
+            <div class="forecast-value">R {{ "{:,.0f}".format(f.predicted_revenue) }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="info-box mt-4" style="margin-top:16px;">
+          <span class="info-icon">ℹ️</span>
+          Forecast generated using Linear Regression on historical booking revenue.
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">🔮</div>
+          <p>Not enough data for forecasting. Add more bookings to enable predictions.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div class="grid-2 mb-6">
+
+  <!-- Anomaly Detection -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">🚨</span> Anomaly Detection</div>
+      <span class="badge badge-red">Z-Score Analysis</span>
+    </div>
+    <div class="card-body">
+      {% if anomalies %}
+        {% for a in anomalies %}
+        <div class="anomaly-alert">
+          <div class="anomaly-icon">{% if a.type == 'Spike' %}📈{% else %}📉{% endif %}</div>
+          <div class="anomaly-info">
+            <div class="anomaly-title">{{ a.type }} Detected — {{ a.date }}</div>
+            <div class="anomaly-meta">Revenue: R {{ "{:,.0f}".format(a.revenue) }} &nbsp;·&nbsp; Z-Score: {{ "%.2f" | format(a.z_score) }}</div>
+          </div>
+          <div class="anomaly-badge {% if a.type == 'Spike' %}spike{% endif %}">{{ a.type }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <p>No anomalies detected. Revenue patterns appear normal.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Customer Segmentation -->
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">👥</span> Customer Segments</div>
+      <span class="badge badge-purple">K-Means Clustering</span>
+    </div>
+    <div class="card-body">
+      {% if segments %}
+        <div class="segment-grid">
+          {% for seg in segments %}
+          <div class="segment-card">
+            <div class="segment-emoji">
+              {% if 'Budget' in seg.name %}💼
+              {% elif 'Premium' in seg.name %}⭐
+              {% elif 'Luxury' in seg.name %}👑
+              {% else %}👤{% endif %}
+            </div>
+            <div class="segment-name">{{ seg.name }}</div>
+            <div class="segment-count">{{ seg.count }}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px;">customers</div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="info-box mt-4" style="margin-top:16px;">
+          <span class="info-icon">ℹ️</span>
+          Segments determined by age and spending using K-Means (k=3).
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">👥</div>
+          <p>Not enough customers for segmentation (minimum 3 required).</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Revenue by Status + Monthly -->
+<div class="grid-2">
+
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📊</span> Revenue by Status</div>
+    </div>
+    <div class="card-body">
+      {% if revenue_by_status %}
+        {% set max_s = revenue_by_status.values() | max %}
+        {% for status, rev in revenue_by_status.items() %}
+        <div class="dest-card" style="margin-bottom:10px;">
+          <div class="dest-icon" style="background:{% if status=='confirmed' %}var(--gradient-green){% elif status=='pending' %}var(--gradient-orange){% else %}linear-gradient(135deg,#64748b,#475569){% endif %};">
+            {% if status == 'confirmed' %}✅{% elif status == 'pending' %}⏳{% else %}❓{% endif %}
+          </div>
+          <div class="dest-info">
+            <div class="dest-name" style="text-transform:capitalize;">{{ status }}</div>
+            <div class="dest-bar-wrap">
+              <div class="dest-bar" style="width:{{ (rev / max_s * 100) | int }}%;background:{% if status=='confirmed' %}var(--gradient-green){% elif status=='pending' %}var(--gradient-orange){% else %}linear-gradient(135deg,#64748b,#475569){% endif %};"></div>
+            </div>
+          </div>
+          <div style="font-weight:700;color:var(--accent-green);">R {{ "{:,.0f}".format(rev) }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><div class="empty-icon">📊</div><p>No data.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card fade-in">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">📅</span> Monthly Revenue</div>
+    </div>
+    <div class="card-body">
+      {% if monthly_revenue %}
+        {% set max_m = monthly_revenue.values() | max %}
+        {% for month, rev in monthly_revenue.items() %}
+        <div class="forecast-item" style="margin-bottom:10px;">
+          <div class="forecast-date" style="width:90px;">{{ month }}</div>
+          <div class="forecast-bar-wrap">
+            <div class="forecast-bar" style="width:{{ (rev / max_m * 100) | int }}%;"></div>
+          </div>
+          <div class="forecast-value">R {{ "{:,.0f}".format(rev) }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><div class="empty-icon">📅</div><p>No monthly data.</p></div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

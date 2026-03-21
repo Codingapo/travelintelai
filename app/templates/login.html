@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — TravelIntel AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/css/style.css"/>
+  <link rel="stylesheet" href="/static/css/auth.css"/>
+</head>
+<body class="auth-body">
+
+  <div class="auth-split">
+
+    <!-- Left panel -->
+    <div class="auth-panel-left">
+      <div class="auth-panel-content">
+        <a href="/" class="auth-back">← Back to home</a>
+        <div class="auth-brand">
+          <span class="auth-brand-icon">✈️</span>
+          <span class="auth-brand-name">TravelIntel <strong>AI</strong></span>
+        </div>
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your agency dashboard and access your intelligence platform.</p>
+
+        {% if error %}
+        <div class="auth-alert error">
+          <span>⚠️</span> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="/login" class="auth-form">
+          <div class="auth-field">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="you@youragency.com" required autocomplete="email"/>
+          </div>
+          <div class="auth-field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Your password" required autocomplete="current-password"/>
+          </div>
+          <button type="submit" class="auth-submit">
+            Sign In to Dashboard
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+
+        <p class="auth-switch">Don't have an account? <a href="/register">Register your agency</a></p>
+
+        <!-- Demo hint -->
+        <div class="auth-demo-hint">
+          <span>💡</span>
+          <span>New here? <a href="/register">Create a free account</a> — no credit card required.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel (decorative) -->
+    <div class="auth-panel-right">
+      <div class="auth-deco-orb auth-deco-orb-1"></div>
+      <div class="auth-deco-orb auth-deco-orb-2"></div>
+      <div class="auth-deco-content">
+        <div class="auth-deco-icon">✈️</div>
+        <h2>Your AI-powered<br/>travel intelligence hub</h2>
+        <p>Monitor bookings, detect anomalies, forecast revenue, and segment customers — all from one dashboard.</p>
+        <div class="auth-deco-stats">
+          <div class="auth-deco-stat">
+            <div class="auth-deco-stat-val">10K+</div>
+            <div class="auth-deco-stat-lbl">Bookings Processed</div>
+          </div>
+          <div class="auth-deco-stat">
+            <div class="auth-deco-stat-val">98%</div>
+            <div class="auth-deco-stat-lbl">Accuracy Rate</div>
+          </div>
+          <div class="auth-deco-stat">
+            <div class="auth-deco-stat-val">50+</div>
+            <div class="auth-deco-stat-lbl">Agencies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

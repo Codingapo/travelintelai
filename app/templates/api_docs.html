@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}API Documentation — TravelIntel AI{% endblock %}
+{% block page_title %}API Documentation{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; Developer{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+  <h1>TravelIntel REST API</h1>
+  <p>Integrate real-time booking intelligence into your agency's platform.</p>
+</div>
+
+<div class="grid-2 fade-in">
+  
+  <!-- Left Column: Guide -->
+  <div style="display:flex;flex-direction:column;gap:24px;">
+    
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🔑</span> Authentication</div>
+      </div>
+      <div class="card-body">
+        <p style="margin-bottom:12px;color:var(--text-secondary);">
+          All API requests must be authenticated using your agency's unique API key. Include it in the <code>x-api-key</code> header.
+        </p>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:12px;font-family:monospace;color:var(--accent-cyan);">
+          x-api-key: {{ request.session.get('agency_api_key', 'your_api_key_here') }}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📡</span> Endpoints</div>
+      </div>
+      <div class="card-body">
+        
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-blue" style="font-family:monospace;font-size:0.8rem;">POST</span>
+            <span style="font-family:monospace;font-weight:600;color:var(--text-primary);">/events</span>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:12px;">
+            Send a booking event to TravelIntel for real-time evaluation, anomaly detection, and forecasting.
+          </p>
+          <h4 style="font-size:0.85rem;color:var(--text-primary);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Request Body (JSON)</h4>
+          <pre style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:16px;font-family:monospace;font-size:0.8rem;color:var(--text-secondary);overflow-x:auto;">
+{
+  "event_id": "evt-123456789",
+  "event_type": "booking.created",
+  "sent_at": "2026-03-19T12:00:00Z",
+  "data": {
+    "booking_id": "BK-9988",
+    "customer": {
+      "name": "Jane Doe",
+      "email": "jane@example.com"
+    },
+    "trip": {
+      "destination": "Cape Town",
+      "departure_date": "2026-04-10"
+    },
+    "payment": {
+      "currency": "ZAR",
+      "amount": 8500
+    }
+  }
+}</pre>
+        </div>
+
+        <div style="border-top:1px solid var(--border-color);padding-top:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-green" style="font-family:monospace;font-size:0.8rem;">GET</span>
+            <span style="font-family:monospace;font-weight:600;color:var(--text-primary);">/bookings/{booking_id}</span>
+          </div>
+          <p style="font-size:0.9rem;color:var(--text-secondary);">
+            Retrieve the full details and AI evaluation results for a specific booking.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Column: Code Examples -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><span class="icon">💻</span> Code Examples</div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      
+      <!-- PHP Example -->
+      <div style="padding:20px;border-bottom:1px solid var(--border-color);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-weight:600;color:var(--accent-blue);">PHP (cURL)</span>
+        </div>
+        <pre style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:16px;font-family:monospace;font-size:0.8rem;color:var(--text-secondary);overflow-x:auto;">
+$ch = curl_init('https://api.travelintel.ai/events');
+$payload = json_encode([
+    'event_id' => 'evt-' . bin2hex(random_bytes(8)),
+    'event_type' => 'booking.created',
+    'sent_at' => gmdate('c'),
+    'data' => [
+        'booking_id' => 'BK-1234',
+        'customer' => ['name' => 'Jane Doe', 'email' => 'jane@example.com'],
+        'trip' => ['destination' => 'Cape Town', 'departure_date' => '2026-04-10'],
+        'payment' => ['currency' => 'ZAR', 'amount' => 8500]
+    ]
+]);
+
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'x-api-key: YOUR_API_KEY'
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;</pre>
+      </div>
+
+      <!-- Python Example -->
+      <div style="padding:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <span style="font-weight:600;color:var(--accent-green);">Python (Requests)</span>
+        </div>
+        <pre style="background:rgba(0,0,0,0.3);border:1px solid var(--border-color);border-radius:8px;padding:16px;font-family:monospace;font-size:0.8rem;color:var(--text-secondary);overflow-x:auto;">
+import requests
+import uuid
+import datetime
+
+url = "https://api.travelintel.ai/events"
+headers = {
+    "Content-Type": "application/json",
+    "x-api-key": "YOUR_API_KEY"
+}
+payload = {
+    "event_id": f"evt-{uuid.uuid4().hex[:16]}",
+    "event_type": "booking.created",
+    "sent_at": datetime.datetime.utcnow().isoformat() + "Z",
+    "data": {
+        "booking_id": "BK-1234",
+        "customer": {"name": "Jane Doe", "email": "jane@example.com"},
+        "trip": {"destination": "Cape Town", "departure_date": "2026-04-10"},
+        "payment": {"currency": "ZAR", "amount": 8500}
+    }
+}
+
+response = requests.post(url, json=payload, headers=headers)
+print(response.json())</pre>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Agencies — TravelIntel AI{% endblock %}
+{% block page_title %}Agencies{% endblock %}
+{% block page_breadcrumb %}&nbsp;/&nbsp; Partner Agencies{% endblock %}
+
+{% block content %}
+
+<div class="page-header fade-in">
+  <h1>🏢 Partner Agencies</h1>
+  <p>All registered travel agencies and their performance metrics.</p>
+</div>
+
+<!-- Summary -->
+<div class="stats-grid mb-6 fade-in">
+  <div class="stat-card blue">
+    <div class="stat-icon">🏢</div>
+    <div class="stat-value">{{ total_agencies }}</div>
+    <div class="stat-label">Total Agencies</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">🎫</div>
+    <div class="stat-value">{{ agency_stats | sum(attribute='total_bookings') }}</div>
+    <div class="stat-label">Total Bookings</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-icon">💰</div>
+    <div class="stat-value">R {{ "{:,.0f}".format(agency_stats | sum(attribute='total_revenue')) }}</div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
+
+<!-- Agency Cards -->
+<div class="grid-auto fade-in">
+  {% for as in agency_stats %}
+  <div class="agency-card">
+    <div class="agency-header">
+      <div class="agency-avatar">{{ as.agency.name[0] | upper }}</div>
+      <div>
+        <div class="agency-name">{{ as.agency.name }}</div>
+        <div class="agency-email">{{ as.agency.email }}</div>
+      </div>
+    </div>
+
+    <div class="agency-stats">
+      <div class="agency-stat">
+        <div class="agency-stat-value">{{ as.total_bookings }}</div>
+        <div class="agency-stat-label">Bookings</div>
+      </div>
+      <div class="agency-stat">
+        <div class="agency-stat-value" style="color:var(--accent-green);">{{ as.confirmed }}</div>
+        <div class="agency-stat-label">Confirmed</div>
+      </div>
+      <div class="agency-stat">
+        <div class="agency-stat-value" style="color:var(--accent-cyan);font-size:0.95rem;">R {{ "{:,.0f}".format(as.total_revenue) }}</div>
+        <div class="agency-stat-label">Revenue</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:6px;">API Key</div>
+      <div class="api-key-box">{{ as.agency.api_key[:20] }}…</div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state" style="grid-column:1/-1;">
+    <div class="empty-icon">🏢</div>
+    <p>No agencies registered yet.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
